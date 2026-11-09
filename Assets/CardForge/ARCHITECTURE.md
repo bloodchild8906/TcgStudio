@@ -56,6 +56,7 @@ To compile independently, open the generated `CardForge.DesignLogic.csproj`, `Ca
 - Keyword JSON bundles reusable ability definitions under a title; card records reference keyword IDs for `[keyword]` rules text and can also reference card-specific ability IDs.
 - Source-card layouts, zone dimensions, per-card override data and stored IDs remain independent of EditorWindow state.
 - UI theme: `Editor/UI/USS/StudioPolish.uss` provides the shared screen styles; `ThemeController` persists theme preference.
+- Light theme: the base sheets keep their dark literal colours, and `Editor/UI/USS/Light/*.uss` re-colours the same rules when `ThemeController` puts `cf-theme-light` on the studio root. Canvases painted from C# (card canvas, turn-flow and resolution graphs), the card preview tiles and the art banners stay dark on purpose. When a dark rule changes, update its twin in `Light/`; new rules should use the `--cf-color-*` tokens so no twin is needed.
 - Studio views and tool windows only create assets after explicit import/save actions.
 - Future game runtimes must implement trusted execution of effect/condition strings; visual graph definitions and state-machine export are data contracts, not a secure gameplay interpreter. The tools validate links but do not claim to simulate an entire digital TCG match.
 - An Ollama Cloud request requires network access and a configured account; importing a font from Google Fonts also requires network access. These are **not** automatically fetched on project open.

@@ -13,3 +13,7 @@
 @import url("QuickOpen.uss");
 @import url("Motion.uss");
 @import url("StudioPolish.uss");
+@import url("Light/LightDesigner.uss");
+@import url("Light/LightShell.uss");
+@import url("Light/LightCardPreview.uss");
+@import url("Light/LightPolish.uss");

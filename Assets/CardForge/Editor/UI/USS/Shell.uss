@@ -55,7 +55,7 @@
 .cf-exit-button { margin: 4px 0 0 0; padding: 6px 10px; min-height: 29px; background-color: transparent; color: var(--cf-color-text-muted); border-width: 1px; border-color: var(--cf-color-border); border-radius: 5px; -unity-text-align: middle-left; }
 .cf-exit-button:hover { color: var(--cf-color-text); background-color: var(--cf-color-row-hover); }
 /* Selection catalogs use the same dark studio surfaces as document editors. */
-.cf-library-mode .cf-workspace {
+.cf-theme-dark.cf-library-mode .cf-workspace {
     --cf-color-bg: #0c1723;
     --cf-color-surface: #142433;
     --cf-color-surface-raised: #1b3040;
