@@ -1,7 +1,7 @@
 {
   "name": "CardForge.Editor",
   "rootNamespace": "CardForge.Editor",
-  "references": ["CardForge.Runtime"],
+  "references": ["CardForge.Runtime", "CardForge.DesignLogic"],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
