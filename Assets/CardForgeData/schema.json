@@ -1,0 +1,82 @@
+{
+    "version": 1,
+    "fields": [
+        {
+            "id": "7e1150461ebe451eb04d2d9733b3ef71",
+            "key": "title",
+            "label": "Card Name",
+            "kind": 0,
+            "defaultValue": "New Discovery",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        },
+        {
+            "id": "35b35a270df44204ad87fc10ea4b1d25",
+            "key": "cost",
+            "label": "Cost",
+            "kind": 1,
+            "defaultValue": "3",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        },
+        {
+            "id": "114ef7b3b56b4be89bc41f0dc8ffca5e",
+            "key": "type",
+            "label": "Type",
+            "kind": 0,
+            "defaultValue": "Creature",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        },
+        {
+            "id": "ca9caa5ca8a3403aa882178aa2d2e0c4",
+            "key": "rules",
+            "label": "Rules Text",
+            "kind": 0,
+            "defaultValue": "Describe this card's ability here.",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        },
+        {
+            "id": "d9c7174f6cb04851861433623f1a2dba",
+            "key": "power",
+            "label": "Power",
+            "kind": 1,
+            "defaultValue": "2",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        },
+        {
+            "id": "df11ac1a2d544824abe10686c7bd14ab",
+            "key": "art",
+            "label": "Art",
+            "kind": 3,
+            "defaultValue": "",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        },
+        {
+            "id": "8b388354a70341a5889318c095e85b45",
+            "key": "faction",
+            "label": "Faction Icon",
+            "kind": 2,
+            "defaultValue": "",
+            "help": "",
+            "decimalPlaces": 0,
+            "prefix": "",
+            "suffix": ""
+        }
+    ]
+}
