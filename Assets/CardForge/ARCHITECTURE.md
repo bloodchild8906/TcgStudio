@@ -9,8 +9,8 @@ This POC does **not** add physical print layouts, mass print exports, or spreads
 | Assembly definition | Purpose | Depends on |
 | --- | --- | --- |
 | `Runtime/CardForge.Runtime.asmdef` | Serializable cards, schemas, layouts, abilities, turn flows, rules and state machine contracts | Unity Runtime |
-| `Runtime/DesignLogic/CardForge.DesignLogic.asmdef` | Pure normalized-frame geometry, atlas slicing and safe naming | Runtime |
-| `Editor/CardForge.Editor.asmdef` | Core designer, JSON store, card rendering, validation and bundle builds | Runtime |
+| `Runtime/DesignLogic/CardForge.DesignLogic.asmdef` | Pure normalized-frame geometry, atlas slicing, safe naming, and graph maths (pan/zoom, edge curves, layered layout, connection rules) | Runtime |
+| `Editor/CardForge.Editor.asmdef` | Core designer, JSON store, card rendering, validation, bundle builds and the shared node graph canvas | Runtime, DesignLogic |
 | `Editor/Extensions/Theme/CardForge.StudioTheme.Editor.asmdef` | Shared persisted theme controller | Unity Editor UI Toolkit |
 | `Editor/Extensions/ImageProcessing/CardForge.ImageProcessing.Editor.asmdef` | Texture readback, slicing, PNG exports, frame overlays | Runtime, DesignLogic, Editor |
 | `Editor/Extensions/Ollama/CardForge.Ollama.Editor.asmdef` | Ollama provider, vision result parser, credentials and settings | ImageProcessing |
@@ -40,11 +40,20 @@ The editing assemblies are **Editor-only**. Game builds must reference `CardForg
 - Screen titles, sidebar order and "New ..." nouns live in `StudioScreens`; add a new screen there first.
 - Stylesheets: `QuickOpen.uss` styles the palette, `Motion.uss` holds transitions and keyboard focus states. Both use only theme tokens.
 
+## Graph canvas
+
+Turn flows, action graphs and ability graphs share one canvas, `Editor/Graph/GraphCanvasView.cs`; `CardForgeWorkflowCanvas` and `CardForgeResolutionGraphCanvas` only map their documents to `GraphNodeData` / `GraphLinkData` and forward events.
+
+- **Mouse:** drag the background (or the middle button) to pan, wheel to zoom around the cursor, drag a node to move it (hold Alt to skip the 10 px snap), drag from a node's right dot onto another node to connect, double-click the background to add a node, click a line to select it.
+- **Keyboard:** `F` fits everything, `0` resets zoom, arrow keys nudge the selected node (Shift for larger steps), `Delete` removes the selected line, `Esc` clears the selection. The toolbar also offers Fit, zoom and Tidy (layered left-to-right layout that wraps long chains into rows).
+- **Persistence:** pan and zoom are remembered per document for the editor session (`GraphViewMemory`), so redrawing the designer keeps your place.
+- **Logic:** maths lives in `Runtime/DesignLogic/Graph*.cs` and is covered by `Graph*Tests`; the canvas itself only wires input to it. Colours come from `--cf-graph-*` custom properties in `USS/Graph.uss`, and the graph stays a dark stage in both themes.
+
 ## Testing
 
 Unity Test Runner > **EditMode** contains:
 
-- `CardForge.DesignLogic.Tests` — no file/network/editor dependencies: valid/invalid AI rectangles, bounds clamping, lossless uneven sprite atlas slicing, safe asset naming.
+- `CardForge.DesignLogic.Tests` — no file/network/editor dependencies: valid/invalid AI rectangles, bounds clamping, lossless uneven sprite atlas slicing, safe asset naming, graph layout (chains, branches, cycles, wrapping, no overlap), pan/zoom/fit maths, edge hit testing and connection rules.
 - `CardForge.CreatorTools.Tests` — no network or user-data writes: Ollama response fixtures, font download-host restrictions, image cropping.
 - `CardForge.Tests` — existing validation/import tests.
 

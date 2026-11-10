@@ -117,10 +117,10 @@ namespace CardForge.Editor
             var bar = Row("content-bar"); center.Add(bar); bar.Add(Title(Flow.name)); bar.Add(Flex());
             bar.Add(Btn("+ Phase", AddFlowNode, "primary-button"));
             bar.Add(Btn("Validate", () => { _notification = ValidateFlow(); Render(); }, "small-button"));
-            bar.Add(Btn("Auto arrange", () => { for(int i=0;i<Flow.nodes.Count;i++){Flow.nodes[i].x=40+(i%3)*310;Flow.nodes[i].y=50+(i/3)*210;} SaveFlow();RefreshFlowCanvas(); }, "small-button"));
+            bar.Add(Btn("Auto arrange", AutoArrangeFlow, "small-button"));
             }
             var canvasWrap = Col("workflow-wrap"); center.Add(canvasWrap);
-            canvasWrap.Add(Note("Drag to position phases; select a node to inspect rules and connect phases in the inspector."));
+            canvasWrap.Add(Note("Drag phases to position them. Drag from a phase's right dot onto another phase to connect them; click a line and press Delete to remove it."));
             _flowCanvas = new CardForgeWorkflowCanvas {
                 ActionLabel = id => _store.Actions.TryGetValue(id, out var action) ? action.name : "Missing action",
                 ActionRuleLabel = rule => {
@@ -130,7 +130,7 @@ namespace CardForge.Editor
                     var triggers = before == 0 && after == 0 ? "" : " · " + before + " before / " + after + " after";
                     return name + " / " + (string.IsNullOrWhiteSpace(rule.availability) ? "unscheduled" : rule.availability) + triggers;
                 }
-            }; canvasWrap.Add(_flowCanvas);
+            }; canvasWrap.Add(_flowCanvas); WireFlowCanvas(_flowCanvas);
             _flowCanvas.Draw(Flow, _flowNodeId, node => { _flowNodeId = node.id; RenderFlowInspector(_inspector); }, node => { SaveFlow(); });
             _inspector = Pane("inspector", 330); _main.Add(_inspector); RenderFlowInspector(_inspector);
         }
@@ -138,8 +138,14 @@ namespace CardForge.Editor
         void AutoArrangeFlow()
         {
             if (Flow == null) return;
-            for (int i = 0; i < Flow.nodes.Count; i++) { Flow.nodes[i].x = 40 + (i % 3) * 310; Flow.nodes[i].y = 50 + (i / 3) * 210; }
-            SaveFlow(); RefreshFlowCanvas();
+            var links = Flow.links.Select(link => new System.Collections.Generic.KeyValuePair<string, string>(link.from, link.to)).ToList();
+            var placements = CardForge.DesignLogic.GraphLayout.Arrange(Flow.nodes.Select(node => node.id).ToList(), links, new CardForge.DesignLogic.GraphLayoutSettings { NodeHeight = 170f });
+            foreach (var placement in placements)
+            {
+                var node = Flow.nodes.First(candidate => candidate.id == placement.Id);
+                node.x = placement.X; node.y = placement.Y;
+            }
+            SaveFlow(); RefreshFlowCanvas(); _flowCanvas?.FitToContent();
         }
 
         void RefreshFlowCanvas()
@@ -298,8 +304,8 @@ namespace CardForge.Editor
             var body = Col("workflow-wrap"); center.Add(body);
             body.Add(Title("Action resolution graph"));
             body.Add(Note("Define the action's checks, costs, targets, orientation changes, effects, and completion. Only steps marked as state changes or trigger emissions interact with the rules engine."));
-            var canvas = new CardForgeResolutionGraphCanvas(); body.Add(canvas);
-            canvas.Draw(action.graphNodes, action.graphLinks, null, _ => { }, _ => SaveAction());
+            var canvas = new CardForgeResolutionGraphCanvas { ViewKey = "action:" + action.id }; body.Add(canvas);
+            ShowResolutionGraph(canvas, action.graphNodes, action.graphLinks, SaveAction, () => RenderActionInspector(_inspector));
         }
 
         void RenderAbilityGraphDesigner(VisualElement center, AbilityDocument ability)
@@ -308,8 +314,8 @@ namespace CardForge.Editor
             var body = Col("workflow-wrap"); center.Add(body);
             body.Add(Title("Ability modification graph"));
             body.Add(Note("Connect keyword intent to conditions, linked action or phase, operation, and effect."));
-            var canvas = new CardForgeResolutionGraphCanvas(); body.Add(canvas);
-            canvas.Draw(ability.graphNodes, ability.graphLinks, null, _ => { }, _ => SaveAbility());
+            var canvas = new CardForgeResolutionGraphCanvas { ViewKey = "ability:" + ability.id }; body.Add(canvas);
+            ShowResolutionGraph(canvas, ability.graphNodes, ability.graphLinks, SaveAbility, () => RenderAbilityInspector(_inspector));
         }
 
         static void EnsureActionGraph(ActionDocument action)
@@ -362,7 +368,7 @@ namespace CardForge.Editor
             group.Add(Btn("+ Add graph step", () => { action.graphNodes.Add(new ResolutionGraphNode { title = "New rule step", x = 100 + action.graphNodes.Count * 30, y = 300 }); SaveAction(); Render(); }, "small-button"));
             foreach (var node in action.graphNodes.ToList())
             {
-                var local = node; var editor = new Foldout { text = local.title, value = false }; group.Add(editor);
+                var local = node; var editor = new Foldout { text = local.title, value = local.id == _graphNodeId }; group.Add(editor);
                 TextBox(editor, "Step", local.title, v => { local.title = v; SaveAction(); Render(); });
                 TextBox(editor, "Rule", local.detail, v => { local.detail = v; SaveAction(); });
                 Choice(editor, "Tone", new[] { "trigger", "process", "effect" }.Select(x => new System.Collections.Generic.KeyValuePair<string,string>(x, x)), local.tone, v => { local.tone = v; SaveAction(); });
@@ -449,7 +455,7 @@ namespace CardForge.Editor
             foreach (var node in ability.graphNodes.ToList())
             {
                 var step = node;
-                var editor = new Foldout { text = step.title, value = false }; group.Add(editor);
+                var editor = new Foldout { text = step.title, value = step.id == _graphNodeId }; group.Add(editor);
                 TextBox(editor, "Step", step.title, v => { step.title = v; SaveAbility(); });
                 TextBox(editor, "Details", step.detail, v => { step.detail = v; SaveAbility(); }, true);
                 Choice(editor, "Type", new[] { "trigger", "process", "effect" }
